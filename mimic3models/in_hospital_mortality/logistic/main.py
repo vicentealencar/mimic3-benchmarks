@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
+import pandas as pd
+
 from mimic3benchmark.readers import InHospitalMortalityReader
 from mimic3models import common_utils
 from mimic3models.metrics import print_metrics_binary
@@ -21,6 +23,13 @@ def read_and_extract_features(reader, period, features):
     return (X, ret['y'], ret['name'])
 
 
+def create_frame(XX, yy):
+    attributes = pd.DataFrame(XX)
+    attributes['target'] = yy
+
+    return attributes
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--C', type=float, default=1.0, help='inverse of L1 / L2 regularization')
@@ -35,6 +44,8 @@ def main():
                         default=os.path.join(os.path.dirname(__file__), '../../../data/in-hospital-mortality/'))
     parser.add_argument('--output_dir', type=str, help='Directory relative which all output files are stored',
                         default='.')
+    parser.add_argument('--generate-data-only', dest='generate_data_only', action="store_true")
+    parser.set_defaults(generate_data_only=False)
     args = parser.parse_args()
     print(args)
 
@@ -57,6 +68,17 @@ def main():
     print('  train data shape = {}'.format(train_X.shape))
     print('  validation data shape = {}'.format(val_X.shape))
     print('  test data shape = {}'.format(test_X.shape))
+
+
+    if args.generate_data_only:
+        data_path = os.path.join(args.output_dir, "mimic3_benchmark_data_logistic.csv")
+        dataset = create_frame(train_X, train_y).append(create_frame(test_X, test_y)).append(create_frame(val_X, val_y))
+        dataset.to_csv(data_path)
+
+        print("Generated and saved the data at: %s" % data_path  )
+
+        return
+
 
     print('Imputing missing values ...')
     imputer = Imputer(missing_values=np.nan, strategy='mean', axis=0, verbose=0, copy=True)
