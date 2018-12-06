@@ -146,6 +146,12 @@ Run the following command to train the neural network which gives the best resul
 Use the following command to train logistic regression. The best model we got used L2 regularization with `C=0.001`:
        
        python -um mimic3models.in_hospital_mortality.logistic.main --l2 --C 0.001 --output_dir mimic3models/in_hospital_mortality/logistic
+       
+The following command can be used to save the dataset used for training the logistic regression model. This command will concatenate train, validation and test sets into a single csv file, which could, potentially, be leveraged for building models using different algorithms:
+
+       python -um mimic3models.in_hospital_mortality.logistic.main --output_dir mimic3models/in_hospital_mortality/logistic --generate-data-only
+       
+The `generate-data-only` option wasn't included for the other models, however, a similar approach could be easily implemented.
 
 ### Decompensation prediction
 
